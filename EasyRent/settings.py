@@ -40,13 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # local
-    'src.apartments.apps.AppConfig',
-    'src.booking.apps.AppConfig',
-    'src.authentication.apps.AppConfig',
+    'src.apartments.apps.ApartmentsConfig',
+    'src.booking.apps.BookingConfig',
+    'src.authentication.apps.AuthenticationConfig',
     #3d-party
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'src.authentication.jwt_middleware.JWTAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -86,7 +88,7 @@ WSGI_APPLICATION = 'EasyRent.wsgi.application'
 if env.bool('USE_REMOTE_DB'):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': env.str('DB_ENGINE'),
             'NAME': env.str('DB_NAME'),
             'HOST': env.str('DB_HOST'),
             'PORT': env.int('DB_PORT'),
@@ -97,7 +99,7 @@ if env.bool('USE_REMOTE_DB'):
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': env.str('LOCAL_DB_ENGINE'),
             'NAME': env.str('LOCAL_DB_NAME'),
             'HOST': env.str('LOCAL_DB_HOST'),
             'PORT': env.int('LOCAL_DB_PORT'),
@@ -125,6 +127,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    #'DEFAULT_PAGINATION_CLASS': 'src.shared.paginators.CustomPageNumber',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
