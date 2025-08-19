@@ -1,10 +1,11 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
 from src.choices import UserRole
 
 
-class CreateUserDTO(serializers.ModelSerializer):
+class RegisterUserDTO(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=UserRole.choices, default=UserRole.TENANT, write_only=True)
     repeat_password = serializers.CharField(
         write_only=True,
@@ -15,6 +16,8 @@ class CreateUserDTO(serializers.ModelSerializer):
         model = User
         fields = [
             "username",
+            "first_name",
+            "last_name",
             "email",
             "password",
             'repeat_password',
@@ -28,6 +31,7 @@ class CreateUserDTO(serializers.ModelSerializer):
         password = attrs.get('password')
         repeat_password = attrs.pop('repeat_password')
 
+        validate_password(password)
         if password != repeat_password:
             raise serializers.ValidationError({
                 "password": "Passwords do not match"
@@ -47,6 +51,27 @@ class CreateUserDTO(serializers.ModelSerializer):
         user.profile.save()
 
         return user
+
+
+class UpdateUserDTO(serializers.ModelSerializer):
+    role = serializers.ChoiceField(choices=UserRole.choices, default=UserRole.TENANT, write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "role"
+        ]
+        extra_kwargs = {
+            "username": {"required": False},
+            "first_name": {"required": False},
+            "last_name": {"required": False},
+            "email": {"required": False},
+            "role": {"required": False}
+        }
 
     def update(self, instance, validated_data):
         role = validated_data.pop("role", None)
@@ -75,6 +100,8 @@ class ListUsersDTO(serializers.ModelSerializer):
         fields = (
             'id',
             'username',
+            'first_name',
+            'last_name',
             'email',
         )
 
@@ -89,11 +116,10 @@ class ListUsersDTO(serializers.ModelSerializer):
 class DetailedUserDTO(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = (
-            "password",
-            "is_active",
-            "is_staff",
-            "date_joined",
-            "groups",
-            "user_permissions"
+        fields = (
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
         )

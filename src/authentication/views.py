@@ -15,8 +15,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 
-from src.authentication.dtos import CreateUserDTO, ListUsersDTO, DetailedUserDTO
-from src.permissions.users import IsAdminOrSelf
+from src.authentication.dtos import RegisterUserDTO, ListUsersDTO, DetailedUserDTO, UpdateUserDTO
+from src.permissions.users import IsAdminOrSelf, IsAnonymous
 
 
 # Список пользователей + регистрация
@@ -26,11 +26,11 @@ class UserListCreateView(ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return ListUsersDTO
-        return CreateUserDTO
+        return RegisterUserDTO
 
     def get_permissions(self):
         if self.request.method == "POST":
-            return [permissions.AllowAny()]  # регистрация доступна всем
+            return [IsAnonymous()]  # регистрация доступна всем
         return [permissions.IsAdminUser()]  # список пользователей виден только админам
 
 
@@ -42,7 +42,7 @@ class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return DetailedUserDTO
-        return CreateUserDTO
+        return UpdateUserDTO
 
 class LoginUserAPIView(APIView):
     permission_classes = [permissions.AllowAny]
