@@ -12,6 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework import status
 
 from src.authentication.dtos import (
@@ -48,6 +49,27 @@ class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'GET':
             return DetailedUserDTO
         return UpdateUserDTO
+
+    def perform_destroy(self, instance: User):
+        """
+        Вместо физического удаления:
+        - деактивируем пользователя (is_active = False)
+        - разлогиниваем его (отзываем все JWT refresh-токены)
+        """
+        instance.is_active = False
+        instance.save()
+
+        tokens = OutstandingToken.objects.filter(user=instance)
+        for token in tokens:
+            BlacklistedToken.objects.get_or_create(token=token)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "User deactivated and logged out."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 class LoginUserAPIView(APIView):
     permission_classes = [permissions.AllowAny]

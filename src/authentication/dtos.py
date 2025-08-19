@@ -105,6 +105,7 @@ class ListUsersDTO(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'email',
+            'is_active'
         )
 
     def to_representation(self, instance):
