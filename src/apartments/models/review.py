@@ -14,4 +14,4 @@ class Review(models.Model):
         unique_together = ("tenant", "listing")  # один отзыв на одно объявление от арендатора
 
     def __str__(self):
-        return f"Отзыв {self.tenant.name} → {self.listing.title} ({self.rating}★)"
+        return f"Review {self.tenant.name} → {self.listing.title} ({self.rating}★)"
