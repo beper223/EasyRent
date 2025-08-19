@@ -5,11 +5,13 @@ from src.authentication.views import (
     UserRetrieveUpdateDestroyView,
     LoginUserAPIView,
     LogoutUserAPIView,
+    ChangePasswordAPIView
 )
 
 urlpatterns = [
-    path("", UserListCreateView.as_view(), name="user-list-create"),
-    path("<int:pk>/", UserRetrieveUpdateDestroyView.as_view(), name="user-detail"),
+    path("", UserListCreateView.as_view()),
+    path("<int:pk>/", UserRetrieveUpdateDestroyView.as_view()),
     path('login/', LoginUserAPIView.as_view()),
     path('logout/', LogoutUserAPIView.as_view()),
+    path("change-password/", ChangePasswordAPIView.as_view()),
 ]

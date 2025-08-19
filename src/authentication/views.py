@@ -6,7 +6,6 @@ from rest_framework.generics import (
 )
 from rest_framework import permissions
 from django.contrib.auth.models import User
-
 from django.contrib.auth import authenticate
 from django.utils.timezone import make_aware
 from rest_framework.request import Request
@@ -15,7 +14,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 
-from src.authentication.dtos import RegisterUserDTO, ListUsersDTO, DetailedUserDTO, UpdateUserDTO
+from src.authentication.dtos import (
+    RegisterUserDTO,
+    ListUsersDTO,
+    DetailedUserDTO,
+    UpdateUserDTO,
+    ChangePasswordDTO
+)
 from src.permissions.users import IsAdminOrSelf, IsAnonymous
 
 
@@ -130,3 +135,12 @@ class LogoutUserAPIView(APIView):
             response.delete_cookie('access')
             response.delete_cookie('refresh')
             return response
+
+class ChangePasswordAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = ChangePasswordDTO(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Password successfully changed"}, status=status.HTTP_200_OK)

@@ -44,6 +44,8 @@ class RegisterUserDTO(serializers.ModelSerializer):
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
+        if role == UserRole.ADMIN:
+            user.is_staff = True
         user.save()
 
         # обновляем профиль ролью
@@ -123,3 +125,25 @@ class DetailedUserDTO(serializers.ModelSerializer):
             'last_name',
             'email',
         )
+
+class ChangePasswordDTO(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    repeat_password = serializers.CharField(required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect")
+        return value
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["repeat_password"]:
+            raise serializers.ValidationError({"repeat_password": "Passwords do not match"})
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save()
+        return user
