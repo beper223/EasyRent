@@ -6,6 +6,10 @@ from src.choices import UserRole
 
 class CreateUserDTO(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=UserRole.choices, default=UserRole.TENANT, write_only=True)
+    repeat_password = serializers.CharField(
+        write_only=True,
+        required=True,
+    )
 
     class Meta:
         model = User
@@ -43,3 +47,53 @@ class CreateUserDTO(serializers.ModelSerializer):
         user.profile.save()
 
         return user
+
+    def update(self, instance, validated_data):
+        role = validated_data.pop("role", None)
+        password = validated_data.pop("password", None)
+
+        # обновляем стандартные поля
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+
+        # менять роль может только админ
+        request = self.context.get("request")
+        if role and request and request.user.is_staff:
+            instance.profile.role = role
+            instance.profile.save()
+
+        return instance
+
+class ListUsersDTO(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+        )
+
+    def to_representation(self, instance):
+        resp = super().to_representation(instance)
+        if instance.profile:
+            resp['role'] = instance.profile.role
+        else:
+            resp['role'] = None
+        return resp
+
+class DetailedUserDTO(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = (
+            "password",
+            "is_active",
+            "is_staff",
+            "date_joined",
+            "groups",
+            "user_permissions"
+        )
