@@ -35,7 +35,10 @@ class ListingViewSet(ModelViewSet):
     ordering = ["-created_at"]  # по умолчанию новые сверху
 
     def perform_create(self, serializer):
-        serializer.save(landlord=self.request.user)
+        serializer.save(
+            landlord=self.request.user,  # назначаем владельца
+            is_active=True  # автоматически делаем объявление активным
+        )
 
     def get_queryset(self):
         user = self.request.user
