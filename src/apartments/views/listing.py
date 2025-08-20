@@ -1,3 +1,6 @@
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter, CharFilter
@@ -58,3 +61,10 @@ class ListingViewSet(ModelViewSet):
 
         # остальные (например, арендаторы) видят только активные
         return qs.filter(is_active=True)
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def my_listings(self, request):
+        """Арендодатель видит только свои объявления"""
+        qs = self.queryset.filter(landlord=request.user)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
