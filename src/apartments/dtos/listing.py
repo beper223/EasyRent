@@ -38,3 +38,18 @@ class ListingDTO(serializers.ModelSerializer):
             data.pop("is_active", None)
 
         return data
+
+class ListingCompactDTO(serializers.ModelSerializer):
+    class Meta:
+        model = Listing
+        fields = [
+            "id",
+            "title",
+            "description",
+            "location",
+            "price",
+            "rooms",
+            "housing_type",
+            "is_active",
+            "created_at"
+        ]
