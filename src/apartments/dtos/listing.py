@@ -32,12 +32,11 @@ class ListingDTO(ListingCompactDTO):
         fields = ListingCompactDTO.Meta.fields + ["landlord"]
 
     def to_representation(self, instance):
-        """Показываем поле is_active только владельцу и админу"""
+        """Показываем поле is_active только админу"""
         data = super().to_representation(instance)
         user = self.context.get("request").user
 
-        if not (user.is_staff or (
-                hasattr(user, "profile") and instance.landlord == user)):
+        if not user.is_staff:
             data.pop("is_active", None)
 
         return data

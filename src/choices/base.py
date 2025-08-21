@@ -4,7 +4,6 @@ from django.db import models
 class UserRole(models.TextChoices):
     TENANT = "tenant", "Mieter"  # Der Mieter (mietet eine Unterkunft)
     LANDLORD = "landlord", "Vermieter"  # Der Vermieter (vermietet eine Unterkunft)
-    ADMIN = "administrator", "Administrator"  # Der Administrator (Systemverwaltung)
 
 class HousingType(models.TextChoices):
     APARTMENT = "apartment","Wohnung"  # Eine Wohnung (Квартира)

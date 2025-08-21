@@ -44,8 +44,6 @@ class RegisterUserDTO(serializers.ModelSerializer):
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
-        if role == UserRole.ADMIN:
-            user.is_staff = True
         user.save()
 
         # обновляем профиль ролью
