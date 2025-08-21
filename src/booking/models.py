@@ -11,6 +11,7 @@ class Booking(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     status = models.CharField(max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
+    cancellable_until = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

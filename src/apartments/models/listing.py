@@ -12,6 +12,7 @@ class Listing(models.Model):
     rooms = models.PositiveIntegerField()
     housing_type = models.CharField(max_length=20, choices=HousingType.choices)
     is_active = models.BooleanField(default=True)
+    cancellation_deadline_days = models.PositiveIntegerField(default=3)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

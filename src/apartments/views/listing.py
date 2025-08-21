@@ -21,7 +21,14 @@ class ListingFilter(FilterSet):
 
     class Meta:
         model = Listing
-        fields = ["min_price", "max_price", "min_rooms", "max_rooms", "location", "housing_type"]
+        fields = [
+            "min_price",
+            "max_price",
+            "min_rooms",
+            "max_rooms",
+            "location",
+            "housing_type"
+        ]
 
 class ListingViewSet(ModelViewSet):
     queryset = Listing.objects.all()
