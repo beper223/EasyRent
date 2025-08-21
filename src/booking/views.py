@@ -5,12 +5,13 @@ from rest_framework.viewsets import ModelViewSet
 
 from src.booking.models import Booking
 from src.booking.dtos import BookingDTO
+from src.permissions import IsTenantOrLandlordOrAdmin
 
 
 class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingDTO
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTenantOrLandlordOrAdmin]
 
     def perform_create(self, serializer):
         listing = serializer.validated_data["listing"]
