@@ -23,3 +23,17 @@ class BookingViewSet(ModelViewSet):
             tenant=self.request.user,
             cancellable_until=cancellable_until
         )
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:
+            # администратор видит все бронирования
+            return Booking.objects.all()
+
+        if hasattr(user, "profile") and user.profile.role == "landlord":
+            # арендодатель видит бронирования своих Listing
+            return Booking.objects.filter(listing__landlord=user)
+
+        # tenant видит только свои бронирования
+        return Booking.objects.filter(tenant=user)
