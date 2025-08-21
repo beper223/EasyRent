@@ -22,7 +22,8 @@ class ListingCompactDTO(serializers.ModelSerializer):
             "rooms",
             "housing_type",
             "is_active",
-            "created_at"
+            "created_at",
+            "cancellation_deadline_days"
 ]
 
 class ListingDTO(ListingCompactDTO):

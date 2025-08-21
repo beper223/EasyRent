@@ -4,14 +4,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from src.booking.models import Booking
-from src.booking.dtos import BookingDTO
+from src.booking.dtos import BookingBaseDTO, BookingCreateDTO, BookingUpdateDTO
 from src.permissions import IsTenantOrLandlordOrAdmin
 
 
 class BookingViewSet(ModelViewSet):
     queryset = Booking.objects.all()
-    serializer_class = BookingDTO
     permission_classes = [IsAuthenticated, IsTenantOrLandlordOrAdmin]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return BookingCreateDTO
+        if self.action in ["update", "partial_update"]:
+            return BookingUpdateDTO
+        return BookingBaseDTO
 
     def perform_create(self, serializer):
         listing = serializer.validated_data["listing"]
