@@ -3,4 +3,5 @@ from django.urls import path, include
 urlpatterns = [
     path('users/', include('src.authentication.urls')),
     path('listings/', include('src.apartments.urls')),
+    path('booking/', include('src.booking.urls')),
 ]
