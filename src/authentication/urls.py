@@ -5,7 +5,8 @@ from src.authentication.views import (
     UserRetrieveUpdateDestroyView,
     LoginUserAPIView,
     LogoutUserAPIView,
-    ChangePasswordAPIView
+    ChangePasswordAPIView,
+    CurrentUserAPIView
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('login/', LoginUserAPIView.as_view()),
     path('logout/', LogoutUserAPIView.as_view()),
     path("change-password/", ChangePasswordAPIView.as_view()),
+    path("my", CurrentUserAPIView.as_view()),
 ]

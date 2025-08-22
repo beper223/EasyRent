@@ -97,14 +97,14 @@ class UpdateUserDTO(serializers.ModelSerializer):
 class ListUsersDTO(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
+        fields = [
             'id',
             'username',
             'first_name',
             'last_name',
             'email',
             'is_active'
-        )
+        ]
 
     def to_representation(self, instance):
         resp = super().to_representation(instance)
@@ -114,16 +114,10 @@ class ListUsersDTO(serializers.ModelSerializer):
             resp['role'] = None
         return resp
 
-class DetailedUserDTO(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-        )
+class DetailedUserDTO(ListUsersDTO):
+    class Meta(ListUsersDTO.Meta):
+        fields = ListUsersDTO.Meta.fields
+        fields.remove('is_active')
 
 class ChangePasswordDTO(serializers.Serializer):
     old_password = serializers.CharField(required=True, write_only=True)

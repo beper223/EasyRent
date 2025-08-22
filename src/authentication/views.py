@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework import status
+from rest_framework.exceptions import NotAuthenticated
 
 from src.authentication.dtos import (
     RegisterUserDTO,
@@ -72,6 +73,9 @@ class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         )
 
 class LoginUserAPIView(APIView):
+    """Login API – получает username и password, возвращает JWT в HttpOnly куках
+    / Login-API – erhält Benutzername und Passwort, gibt JWT in HttpOnly-Cookies zurück
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request: Request, *args, **kwargs) -> Response:
@@ -84,47 +88,41 @@ class LoginUserAPIView(APIView):
                 password=password
             )
 
-            if user:
-                response = Response(status=status.HTTP_200_OK)
+            if not user:
+                return Response({'error': 'Invalid username or password'},status=status.HTTP_401_UNAUTHORIZED)
 
+            response = Response({"detail": "Login successful"},status=status.HTTP_200_OK)
 
-                refresh = RefreshToken.for_user(user)
-                access = refresh.access_token
+            refresh = RefreshToken.for_user(user)
+            access = refresh.access_token
 
-                refresh_exp = make_aware(
-                    datetime.fromtimestamp(refresh.payload['exp'])
-                )
-                access_exp = make_aware(
-                    datetime.fromtimestamp(access.payload['exp'])
-                )
+            refresh_exp = make_aware(
+                datetime.fromtimestamp(refresh.payload['exp'])
+            )
+            access_exp = make_aware(
+                datetime.fromtimestamp(access.payload['exp'])
+            )
 
-                response.set_cookie(
-                    key='refresh',
-                    value=str(refresh),
-                    httponly=True,
-                    secure=True,
-                    samesite='Lax',
-                    expires=refresh_exp
-                )
+            response.set_cookie(
+                key='refresh',
+                value=str(refresh),
+                httponly=True,
+                secure=True,
+                samesite='Lax',
+                expires=refresh_exp
+            )
 
-                response.set_cookie(
-                    key='access',
-                    value=str(access),
-                    httponly=True,
-                    secure=True,
-                    samesite='Lax',
-                    expires=access_exp
-                )
+            response.set_cookie(
+                key='access',
+                value=str(access),
+                httponly=True,
+                secure=True,
+                samesite='Lax',
+                expires=access_exp
+            )
 
-                return response
+            return response
 
-            else:
-                return Response(
-                    data={
-                        'error': 'Invalid username or password'
-                    },
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
         except Exception as e:
             return Response(
                 data={
@@ -139,10 +137,8 @@ class LogoutUserAPIView(APIView):
     def post(self, request: Request, *args, **kwargs) -> Response:
         try:
             refresh_token = request.COOKIES.get('refresh')
-
             if refresh_token:
                 token = RefreshToken(refresh_token)
-
                 token.blacklist()
 
             response = Response(status=status.HTTP_200_OK)
@@ -166,3 +162,19 @@ class ChangePasswordAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Password successfully changed"}, status=status.HTTP_200_OK)
+
+class CurrentUserAPIView(APIView):
+    """
+    Возвращает сведения о текущем пользователе
+    / Gibt Informationen über den aktuellen Benutzer zurück
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user or not user.is_authenticated:
+            # стандартное сообщение DRF
+            raise NotAuthenticated()
+
+        serializer = DetailedUserDTO(user)
+        return Response(serializer.data)
