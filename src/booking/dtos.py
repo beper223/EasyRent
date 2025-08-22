@@ -97,16 +97,13 @@ class BookingUpdateDTO(BookingBaseDTO):
             elif new_status == BookingStatus.CANCELLED:
                 if not (hasattr(user, "profile") and user.profile.role == "tenant"):
                     raise ValidationError("Only tenant can cancel a pending booking.")
+                if date.today() > instance.cancellable_until:
+                    raise ValidationError("Cancellation period has expired for this booking.")
             else:
                 raise ValidationError("Invalid status change from 'pending'.")
 
         elif current == BookingStatus.CONFIRMED:
-            if new_status == BookingStatus.CANCELLED:
-                if not (hasattr(user, "profile") and user.profile.role == "tenant"):
-                    raise ValidationError("Only tenant can cancel a confirmed booking.")
-                if date.today() > instance.cancellable_until:
-                    raise ValidationError("Cancellation period has expired for this booking.")
-            elif new_status == BookingStatus.CHECKED:
+            if new_status == BookingStatus.CHECKED:
                 if not (hasattr(user, "profile") and user.profile.role == "landlord"):
                     raise ValidationError("Only landlord can mark confirmed booking as checked.")
                 if date.today() < instance.start_date:
