@@ -110,7 +110,9 @@ class BookingUpdateDTO(BookingBaseDTO):
                 if not (hasattr(user, "profile") and user.profile.role == "landlord"):
                     raise ValidationError("Only landlord can mark confirmed booking as checked.")
                 if date.today() < instance.start_date:
-                    raise ValidationError("Booking cannot be marked as checked before its start date.")
+                    raise ValidationError(
+                        f"Booking cannot be marked as checked before its start date ({instance.start_date})."
+                    )
             else:
                 raise ValidationError("Invalid status change from 'confirmed'.")
 
