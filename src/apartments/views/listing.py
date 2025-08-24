@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,8 +8,8 @@ from django_filters.rest_framework import DjangoFilterBackend, FilterSet, Number
 from django.db.models import Q
 
 from src.apartments.models import Listing
-from src.apartments.dtos import ListingDTO, ListingCompactDTO
-from src.permissions import IsLandlordOrAdmin
+from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewDTO
+from src.permissions import IsLandlordOrAdmin, IsTenant
 
 
 class ListingFilter(FilterSet):
@@ -75,3 +76,17 @@ class ListingViewSet(ModelViewSet):
         qs = self.queryset.filter(landlord=request.user)
         serializer = ListingCompactDTO(qs, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsTenant])
+    def add_review(self, request, pk=None):
+        """Добавить отзыв для объявления /
+        Eine Bewertung für ein Inserat hinzufügen
+        """
+        listing = self.get_object()
+
+        serializer = ReviewCreateDTO(
+            data=request.data, context={"request": request, "listing": listing}
+        )
+        serializer.is_valid(raise_exception=True)
+        review = serializer.save()
+        return Response(ReviewDTO(review).data, status=status.HTTP_201_CREATED)

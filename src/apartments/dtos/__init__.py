@@ -1,6 +1,9 @@
 from src.apartments.dtos.listing import ListingDTO, ListingCompactDTO
+from src.apartments.dtos.review import ReviewCreateDTO, ReviewDTO
 
 __all__ = [
     'ListingDTO',
-    'ListingCompactDTO'
+    'ListingCompactDTO',
+    'ReviewCreateDTO',
+    'ReviewDTO'
 ]

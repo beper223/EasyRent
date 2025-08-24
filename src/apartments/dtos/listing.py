@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from src.apartments.models import Listing
-from src.choices import HousingType
 
 class LandlordDTO(serializers.ModelSerializer):
     class Meta:
