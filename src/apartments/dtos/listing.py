@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from src.apartments.dtos.review import ReviewDTO
 from src.apartments.models import Listing
 
 class LandlordDTO(serializers.ModelSerializer):
@@ -40,3 +41,10 @@ class ListingDTO(ListingCompactDTO):
             data.pop("is_active", None)
 
         return data
+
+class ListingDetailDTO(ListingDTO):
+    """Сериализатор для детального просмотра Listing с отзывами"""
+    reviews = ReviewDTO(many=True, read_only=True)
+
+    class Meta(ListingDTO.Meta):
+        fields = ListingDTO.Meta.fields + ["reviews"]

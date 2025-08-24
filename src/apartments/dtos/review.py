@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from src.apartments.models import Review, Listing
+from src.apartments.models import Review
 from src.booking.models import Booking
 from src.choices import BookingStatus
 
@@ -56,21 +55,24 @@ class ReviewCreateDTO(serializers.ModelSerializer):
         validated_data["listing"] = self.context["listing"]
         return super().create(validated_data)
 
-class ReviewDTO(serializers.ModelSerializer):
+class ReviewCompactDTO(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
     class Meta:
         model = Review
         fields = [
             "id",
             "tenant",
-            "listing",
             "rating",
             "comment",
             "created_at"
         ]
-        read_only_fields = [
-            "id",
-            "tenant",
-            "listing",
-            "created_at"
-        ]
+
+class ReviewDTO(ReviewCompactDTO):
+    tenant = serializers.SlugRelatedField(
+        slug_field="username",  # выводим имя
+        read_only=True
+    )
+    class Meta(ReviewCompactDTO.Meta):
+        fields = ReviewCompactDTO.Meta.fields + ["listing"]
+

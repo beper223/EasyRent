@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend, FilterSet, Number
 from django.db.models import Q
 
 from src.apartments.models import Listing
-from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewDTO
+from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewCompactDTO, ListingDetailDTO
 from src.permissions import IsLandlordOrAdmin, IsTenant
 
 
@@ -33,7 +33,6 @@ class ListingFilter(FilterSet):
 
 class ListingViewSet(ModelViewSet):
     queryset = Listing.objects.all()
-    serializer_class = ListingDTO
     permission_classes = [IsLandlordOrAdmin]
     filter_backends = [
         DjangoFilterBackend,
@@ -44,6 +43,11 @@ class ListingViewSet(ModelViewSet):
     search_fields = ["title", "description"]  # Suche nach Schlüsselwörtern
     ordering_fields = ["price", "created_at"]  # Sortierung nach Preis und Erstellungsdatum
     ordering = ["-created_at"]  # standardmäßig neue Einträge zuerst
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return ListingDetailDTO  # детальный просмотр с отзывами
+        return ListingDTO  # список без отзывов
 
     def perform_create(self, serializer):
         serializer.save(
@@ -89,4 +93,4 @@ class ListingViewSet(ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         review = serializer.save()
-        return Response(ReviewDTO(review).data, status=status.HTTP_201_CREATED)
+        return Response(ReviewCompactDTO(review).data, status=status.HTTP_201_CREATED)
