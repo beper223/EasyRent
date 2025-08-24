@@ -7,7 +7,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter, CharFilter
 from django.db.models import Q
 
-from src.apartments.models import Listing
+from src.apartments.models import Listing, ListingView
 from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewCompactDTO, ListingDetailDTO
 from src.permissions import IsLandlordOrAdmin, IsTenant
 
@@ -73,6 +73,18 @@ class ListingViewSet(ModelViewSet):
 
         # andere (z.B. Mieter) sehen nur aktive Anzeigen
         return qs.filter(is_active=True)
+
+    def retrieve(self, request, *args, **kwargs):
+        listing = self.get_object()
+        user = request.user
+
+        if user.is_authenticated:
+            ListingView.objects.get_or_create(
+                listing=listing,
+                user=user
+            )
+
+        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def my_listings(self, request):
