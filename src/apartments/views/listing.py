@@ -79,10 +79,11 @@ class ListingViewSet(ModelViewSet):
         user = request.user
 
         if user.is_authenticated:
-            ListingView.objects.get_or_create(
-                listing=listing,
-                user=user
-            )
+            if listing.landlord_id != user.id:
+                ListingView.objects.get_or_create(
+                    listing=listing,
+                    user=user
+                )
 
         return super().retrieve(request, *args, **kwargs)
 
