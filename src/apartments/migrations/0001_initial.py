@@ -38,7 +38,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('listing', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='apartments.listing')),
                 ('tenant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to=settings.AUTH_USER_MODEL)),
-                ('booking', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='review',to='booking.booking')),
             ],
             options={
                 'unique_together': {('tenant', 'listing')},
