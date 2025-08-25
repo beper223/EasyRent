@@ -28,14 +28,41 @@ from src.permissions.users import IsAdminOrSelf, IsAnonymous
 
 # Список пользователей + регистрация
 class UserListCreateView(ListCreateAPIView):
+    """
+    API endpoint для работы со списком пользователей.
+    - GET: возвращает список пользователей (только для администраторов)
+    - POST: регистрация нового пользователя
+    
+    API-Endpunkt für die Benutzerverwaltung.
+    - GET: Gibt eine Liste der Benutzer zurück (nur für Administratoren)
+    - POST: Registriert einen neuen Benutzer
+    """
     queryset = User.objects.all()
 
     def get_serializer_class(self):
+        """
+        Возвращает соответствующий сериализатор в зависимости от метода запроса.
+        - GET: ListUsersDTO - список пользователей
+        - POST: RegisterUserDTO - регистрация пользователя
+        
+        Gibt den entsprechenden Serializer basierend auf der Anfragemethode zurück.
+        - GET: ListUsersDTO - Benutzerliste
+        - POST: RegisterUserDTO - Benutzerregistrierung
+        """
         if self.request.method == 'GET':
             return ListUsersDTO
         return RegisterUserDTO
 
     def get_permissions(self):
+        """
+        Определяет права доступа в зависимости от метода запроса.
+        - POST: доступно всем (регистрация)
+        - GET: только для администраторов
+        
+        Bestimmt die Zugriffsrechte basierend auf der Anfragemethode.
+        - POST: für alle verfügbar (Registrierung)
+        - GET: nur für Administratoren
+        """
         if self.request.method == "POST":
             return [IsAnonymous()]  # регистрация доступна всем
         return [permissions.IsAdminUser()]  # список пользователей виден только админам
@@ -43,6 +70,17 @@ class UserListCreateView(ListCreateAPIView):
 
 # Работа с конкретным пользователем
 class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint для работы с конкретным пользователем.
+    - GET: просмотр профиля
+    - PATCH: частичное обновление
+    - DELETE: деактивация пользователя
+    
+    API-Endpunkt für die Arbeit mit einem bestimmten Benutzer.
+    - GET: Profil anzeigen
+    - PATCH: Teilweise Aktualisierung
+    - DELETE: Deaktivierung des Benutzers
+    """
     queryset = User.objects.all()
     permission_classes = [IsAdminOrSelf]
 
@@ -56,6 +94,10 @@ class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         Вместо физического удаления:
         - деактивируем пользователя (is_active = False)
         - разлогиниваем его (отзываем все JWT refresh-токены)
+        
+        Anstatt den Benutzer physisch zu löschen:
+        - Deaktiviert den Benutzer (is_active = False)
+        - Meldet den Benutzer ab (widerruft alle JWT-Aktualisierungstoken)
         """
         instance.is_active = False
         instance.save()
@@ -73,8 +115,20 @@ class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         )
 
 class LoginUserAPIView(APIView):
-    """Login API – получает username и password, возвращает JWT в HttpOnly куках
-    / Login-API – erhält Benutzername und Passwort, gibt JWT in HttpOnly-Cookies zurück
+    """
+    API для аутентификации пользователя.
+    Принимает username и password, возвращает JWT-токены в HttpOnly куках.
+    
+    API zur Benutzerauthentifizierung.
+    Nimmt Benutzername und Passwort entgegen und gibt JWT-Token in HttpOnly-Cookies zurück.
+    
+    Параметры запроса (JSON):
+    - username: Имя пользователя
+    - password: Пароль
+    
+    Anforderungsparameter (JSON):
+    - username: Benutzername
+    - password: Passwort
     """
     permission_classes = [permissions.AllowAny]
 
@@ -133,6 +187,13 @@ class LoginUserAPIView(APIView):
 
 
 class LogoutUserAPIView(APIView):
+    """
+    API для выхода пользователя из системы.
+    Отзывает refresh-токен и удаляет куки аутентификации.
+    
+    API zum Abmelden des Benutzers.
+    Widerruft das Aktualisierungstoken und entfernt die Authentifizierungs-Cookies.
+    """
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         try:
@@ -155,6 +216,23 @@ class LogoutUserAPIView(APIView):
             return response
 
 class ChangePasswordAPIView(APIView):
+    """
+    API для изменения пароля пользователя.
+    Требует аутентификации.
+    
+    API zum Ändern des Benutzerpassworts.
+    Erfordert Authentifizierung.
+    
+    Параметры запроса (JSON):
+    - old_password: Текущий пароль
+    - new_password: Новый пароль
+    - new_password_confirm: Подтверждение нового пароля
+    
+    Anforderungsparameter (JSON):
+    - old_password: Aktuelles Passwort
+    - new_password: Neues Passwort
+    - new_password_confirm: Neues Passwort bestätigen
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -165,8 +243,25 @@ class ChangePasswordAPIView(APIView):
 
 class CurrentUserAPIView(APIView):
     """
-    Возвращает сведения о текущем пользователе
-    / Gibt Informationen über den aktuellen Benutzer zurück
+    Возвращает сведения о текущем аутентифицированном пользователе.
+    
+    Gibt Informationen über den aktuell authentifizierten Benutzer zurück.
+    
+    Возвращаемые поля:
+    - id: ID пользователя
+    - username: Имя пользователя
+    - email: Электронная почта
+    - first_name: Имя
+    - last_name: Фамилия
+    - profile: Профиль пользователя
+    
+    Rückgabefelder:
+    - id: Benutzer-ID
+    - username: Benutzername
+    - email: E-Mail
+    - first_name: Vorname
+    - last_name: Nachname
+    - profile: Benutzerprofil
     """
     permission_classes = [permissions.AllowAny]
 
