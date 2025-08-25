@@ -1,7 +1,7 @@
 [project]
 name = "easyrent"
 version = "0.1.0"
-description = "Add your description here"
+description = "EasyRent - A modern property rental platform."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
