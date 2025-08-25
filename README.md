@@ -72,13 +72,14 @@ EasyRent - это современная веб-платформа для аре
 ### Арендатор
 - Просмотр и поиск объявлений
 - Бронирование жилья
-- Оставление отзывов
+- Оставление отзывов на арендованное жильё (после завершения бронирования)
 - Управление своими бронированиями
 
 ### Арендодатель
-- Всё, что может арендатор
-- Создание и управление объявлениями
-- Подтверждение бронирований
+- Просмотр и поиск объявлений
+- Создание и управление своими объявлениями
+- Подтверждение/отклонение бронирований
+- Просмотр отзывов к своим объявлениям
 - Просмотр статистики по объявлениям
 
 ### Администратор
@@ -259,13 +260,14 @@ EasyRent is a modern web platform for apartment rentals that connects landlords 
 ### Tenant
 - Browse and search listings
 - Book properties
-- Leave reviews
+- Leave reviews on booked listings (after completed booking)
 - Manage own bookings
 
 ### Landlord
-- All tenant capabilities
-- Create and manage listings
+- Browse and search listings
+- Create and manage own listings
 - Confirm/reject bookings
+- View reviews on own listings
 - View listing statistics
 
 ### Administrator
@@ -446,13 +448,14 @@ EasyRent ist eine moderne Webplattform zur Wohnungsvermittlung, die Vermieter un
 ### Mieter
 - Anzeigen durchsuchen und suchen
 - Unterkünfte buchen
-- Bewertungen hinterlassen
+- Bewertungen für gebuchte Unterkünfte hinterlassen (nach abgeschlossener Buchung)
 - Eigene Buchungen verwalten
 
 ### Vermieter
-- Alle Funktionen eines Mieters
-- Anzeigen erstellen und verwalten
+- Anzeigen durchsuchen und suchen
+- Eigene Anzeigen erstellen und verwalten
 - Buchungen bestätigen/ablehnen
+- Bewertungen zu eigenen Anzeigen einsehen
 - Anzeigenstatistiken einsehen
 
 ### Administrator
