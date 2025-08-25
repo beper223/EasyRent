@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -141,6 +142,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -166,6 +168,45 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=7),
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'EasyRent API',
+    'DESCRIPTION': 'Simple API for Library management',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'AUTHENTICATION_WHITELIST': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
+    'SCHEMA_PATH_PREFIX': '/api/v1/',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'displayRequestDuration': True,#False
+        'filter': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+        'docExpansion': 'none',# 'list' or 'full'
+
+        # 'persistAuthorization': True,
+        # 'displayOperationId': False,
+        # 'defaultModelsExpandDepth': 1,
+        # 'defaultModelExpandDepth': 1,
+        # 'defaultModelRendering': 'example',
+        # 'operationsSorter': 'alpha',
+        # 'tagsSorter': 'alpha'
+    },
+    'SECURITY': [
+        {
+            'BearerAuth': [],
+        },
+    ],
+    'COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            }
+        }
+    },
+}
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
