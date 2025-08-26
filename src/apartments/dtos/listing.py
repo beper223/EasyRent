@@ -11,7 +11,8 @@ class LandlordDTO(serializers.ModelSerializer):
 
 class ListingCompactDTO(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    views_count = serializers.SerializerMethodField()
+    views_count = serializers.IntegerField(read_only=True)
+    reviews_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Listing
@@ -27,10 +28,8 @@ class ListingCompactDTO(serializers.ModelSerializer):
             "created_at",
             "cancellation_deadline_days",
             "views_count",
+            "reviews_count",
         ]
-
-    def get_views_count(self, obj):
-        return obj.views.count()
 
 class ListingDTO(ListingCompactDTO):
     landlord = LandlordDTO(read_only=True)

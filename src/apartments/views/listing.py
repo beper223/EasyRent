@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter, CharFilter
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from src.apartments.models import Listing, ListingView
 from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewCompactDTO, ListingDetailDTO
@@ -66,7 +66,7 @@ class ListingViewSet(ModelViewSet):
     ]
     filterset_class = ListingFilter
     search_fields = ["title", "description"]  # Suche nach Schlüsselwörtern
-    ordering_fields = ["price", "created_at"]  # Sortierung nach Preis und Erstellungsdatum
+    ordering_fields = ["price", "created_at", "views_count", "reviews_count"]  # Sortierung nach Preis und Erstellungsdatum
     ordering = ["-created_at"]  # standardmäßig neue Einträge zuerst
 
     def get_serializer_class(self):
@@ -111,7 +111,13 @@ class ListingViewSet(ModelViewSet):
         - Andere: nur aktive Anzeigen
         """
         user = self.request.user
-        qs = Listing.objects.all()
+        qs = (
+            Listing.objects.all()
+            .annotate(
+                views_count=Count("views", distinct=True),
+                reviews_count=Count("reviews", distinct=True)
+            )
+        )
 
         if not user.is_authenticated:
             # nicht authentifizierte Benutzer sehen nur aktive Anzeigen

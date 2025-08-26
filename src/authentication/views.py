@@ -67,8 +67,6 @@ class UserListCreateView(ListCreateAPIView):
             return [IsAnonymous()]  # регистрация доступна всем
         return [permissions.IsAdminUser()]  # список пользователей виден только админам
 
-
-# Работа с конкретным пользователем
 class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
     API endpoint для работы с конкретным пользователем.
