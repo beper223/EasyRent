@@ -7,9 +7,10 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter, CharFilter
 from django.db.models import Q, Count
 
-from src.apartments.models import Listing, ListingView
+from src.apartments.models import Listing
 from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewCompactDTO, ListingDetailDTO
 from src.permissions import IsLandlordOrAdmin, IsTenant
+from src.apartments.services import ViewService
 
 
 class ListingFilter(FilterSet):
@@ -137,20 +138,16 @@ class ListingViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         """
         Возвращает детали объявления.
-        При просмотре не своим объявлением создает запись о просмотре.
+        Учитывает просмотры для аутентифицированных и анонимных пользователей.
         
         Gibt die Details einer Anzeige zurück.
-        Erstellt einen Eintrag in der Anzeigenstatistik, wenn die Anzeige nicht dem Benutzer gehört.
+        Berücksichtigt Ansichten von authentifizierten und anonymen Benutzern.
         """
         listing = self.get_object()
-        user = request.user
-
-        if user.is_authenticated:
-            if listing.landlord_id != user.id:
-                ListingView.objects.get_or_create(
-                    listing=listing,
-                    user=user
-                )
+        
+        # Учитываем просмотр, если пользователь не владелец объявления
+        if not request.user.is_authenticated or request.user.id != listing.landlord_id:
+            ViewService.record_view(listing, request)
 
         return super().retrieve(request, *args, **kwargs)
 
