@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter, CharFilter
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum, Value
+from django.db.models.functions import Coalesce
 
 from src.apartments.models import Listing
-from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewCompactDTO, ListingDetailDTO
+from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewDTO, ListingDetailDTO
 from src.permissions import IsLandlordOrAdmin, IsTenant
 from src.apartments.services import ViewService
 
@@ -115,7 +116,7 @@ class ListingViewSet(ModelViewSet):
         qs = (
             Listing.objects.all()
             .annotate(
-                views_count=Count("views", distinct=True),
+                views_count=Coalesce(Sum("views__view_count"), Value(0)),
                 reviews_count=Count("reviews", distinct=True)
             )
         )
@@ -160,7 +161,8 @@ class ListingViewSet(ModelViewSet):
         Gibt die Liste der Anzeigen des aktuellen Benutzers zurück.
         Nur für authentifizierte Benutzer verfügbar.
         """
-        qs = self.queryset.filter(landlord=request.user)
+        # Используем get_queryset() для получения аннотаций, затем фильтруем по текущему пользователю
+        qs = self.get_queryset().filter(landlord=request.user)
         serializer = ListingCompactDTO(qs, many=True) 
         return Response(serializer.data)
 
@@ -188,4 +190,4 @@ class ListingViewSet(ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         review = serializer.save()
-        return Response(ReviewCompactDTO(review).data, status=status.HTTP_201_CREATED)
+        return Response(ReviewCreateDTO(review).data, status=status.HTTP_201_CREATED)

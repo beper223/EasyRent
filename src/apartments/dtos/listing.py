@@ -53,3 +53,11 @@ class ListingDetailDTO(ListingDTO):
 
     class Meta(ListingDTO.Meta):
         fields = ListingDTO.Meta.fields + ["reviews"]
+
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     # Удаляем поле listing из каждого отзыва, если оно есть
+    #     if 'reviews' in data:
+    #         for review in data['reviews']:
+    #             review.pop('listing', None)
+    #     return data
