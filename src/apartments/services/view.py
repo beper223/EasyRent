@@ -6,7 +6,7 @@ from src.apartments.models.listing import Listing
 
 class ViewService:
     @staticmethod
-    def record_view(listing: Listing, request: HttpRequest) -> ListingView:
+    def record_view(listing: Listing, request: HttpRequest):
         """
         Учитывает просмотр объявления.
         Если пользователь уже просматривал это объявление, увеличивает счетчик.

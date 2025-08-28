@@ -11,7 +11,7 @@ from django.db.models.functions import Coalesce
 from src.apartments.models import Listing
 from src.apartments.dtos import ListingDTO, ListingCompactDTO, ReviewCreateDTO, ReviewDTO, ListingDetailDTO
 from src.permissions import IsLandlordOrAdmin, IsTenant
-from src.apartments.services import ViewService
+from src.apartments.services import ViewService, SearchService
 
 
 class ListingFilter(FilterSet):
@@ -67,7 +67,7 @@ class ListingViewSet(ModelViewSet):
         OrderingFilter
     ]
     filterset_class = ListingFilter
-    search_fields = ["title", "description"]  # Suche nach Schlüsselwörtern
+    search_fields = ["title", "description", "location"]  # Suche nach Schlüsselwörtern
     ordering_fields = ["price", "created_at", "views_count", "reviews_count"]  # Sortierung nach Preis und Erstellungsdatum
     ordering = ["-created_at"]  # standardmäßig neue Einträge zuerst
 
@@ -120,6 +120,11 @@ class ListingViewSet(ModelViewSet):
                 reviews_count=Count("reviews", distinct=True)
             )
         )
+
+        # --- сохраняем поисковый запрос ---
+        keyword = self.request.query_params.get("search")
+        if keyword:
+            SearchService.log_search(user, keyword)
 
         if not user.is_authenticated:
             # nicht authentifizierte Benutzer sehen nur aktive Anzeigen
