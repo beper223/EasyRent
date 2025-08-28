@@ -72,20 +72,24 @@ class BookingViewSet(ModelViewSet):
         - Арендодатели: бронирования своих объявлений
         - Арендаторы: только свои бронирования
         
+        Сортировка по убыванию даты начала (start_date)
+        
         Gibt einen QuerySet von Buchungen zurück, abhängig von den Benutzerrechten.
         - Administratoren: alle Buchungen
         - Vermieter: Buchungen für ihre Anzeigen
         - Mieter: nur eigene Buchungen
+        
+        Sortiert nach Startdatum absteigend
         """
         user = self.request.user
+        queryset = Booking.objects.all().order_by('-start_date')
 
         if user.is_staff:
             # администратор видит все бронирования
-            return Booking.objects.all()
-
-        if hasattr(user, "profile") and user.profile.role == "landlord":
+            return queryset
+        elif hasattr(user, "profile") and user.profile.role == "landlord":
             # арендодатель видит бронирования своих Listing
-            return Booking.objects.filter(listing__landlord=user)
-
-        # tenant видит только свои бронирования
-        return Booking.objects.filter(tenant=user)
+            return queryset.filter(listing__landlord=user)
+        else:
+            # tenant видит только свои бронирования
+            return queryset.filter(tenant=user)
